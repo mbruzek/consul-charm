@@ -1,0 +1,20 @@
+options:
+  log-level: 
+    type: string
+    default: info
+    description: "Logging level"
+  domain:
+    type: string
+    default: consul
+    description: "Domain for dns records"
+# 
+#
+#  encrypt:
+#    type: boolean
+#    default: false
+#    description: "Encrypt all communications"
+#
+#  disable-exec:
+#    type: boolean
+#    default: false
+#    description: "Disable remote execution through consul"

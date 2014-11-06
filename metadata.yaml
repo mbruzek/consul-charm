@@ -1,0 +1,16 @@
+name: consul
+summary: Distributed service discovery and configuration.
+description: |
+  A highly-available multi-data center aware solution for service
+  discovery with integrated failure detection.
+provides:
+  admin:
+    interface: http
+  api:
+    interface: consul
+requires:
+  stats:
+    interface: statsd
+peers:
+  cluster:
+    interface: raft

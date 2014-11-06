@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -ex
+
+echo "Installing kubernetes-node on $JUJU_UNIT_NAME"
+
+TGT_DIR=/usr/local/bin
+
+
+bzip2 -k -c -d $CHARM_DIR/files/consul.amd64.bz2 > $TGT_DIR/kubelet
+chmod 555 $TGT_DIR/consul
+
+groupadd consul
+useradd -d /var/lib/consul \
+    -g consul \
+    -s /sbin/nologin \
+    --system \
+    consul
+
+mkdir /var/lib/consul
+chown consul: /var/lib/consul
+
+mkdir /var/run/consul
+chown consul: /var/run/consul
+
+mkdir /usr/share/consul
+chown consul: /usr/share/consul
+
+unzip $CHARM_DIR/files/web_ui.zip -d /usr/share/consul
