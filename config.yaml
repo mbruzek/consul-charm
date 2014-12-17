@@ -7,7 +7,6 @@ options:
     type: string
     default: consul
     description: "Domain for dns records"
-# 
 #
 #  encrypt:
 #    type: boolean

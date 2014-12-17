@@ -1,0 +1,13 @@
+description "Consul"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+limit nofile 20000 20000
+
+manual
+
+kill timeout 60 # wait 60s between SIGTERM and SIGKILL.
+
+
+exec /usr/local/bin/consul agent -config-file=/etc/consul.json

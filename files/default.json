@@ -1,18 +1,20 @@
 {
-    'ui_dir': '/usr/share/consul/dist',
-    'client': '0.0.0.0'
-    'data_dir': '/var/lib/consul',
-    'disable_update_check': true,
-    'recursor': '8.8.8.8',
-    'rejoin_after_leave': true,
-    'leave_on_terminate': true,
-    'acl_default_policy': 'allow',
-    'acl_down-policy': 'extend-cache'
-    'ports': {
-	'dns': 53,
-	'http': 8500,
-	'rpc': 8400,
-	'serf_lan': 8301,
-	'serf_wan': 8302,
-	'server': 8300},
+  "client_addr": "0.0.0.0",
+  "recursor": "8.8.8.8",
+  "ui_dir": "/usr/share/consul/dist",
+  "leave_on_terminate": true,
+  "rejoin_after_leave": true,
+  "disable_update_check": true,
+  "data_dir": "/var/lib/consul",
+  "server": true,
+  "ports": {
+    "http": 8500,
+    "serf_lan": 8301,
+    "server": 8300,
+    "rpc": 8400,
+    "dns": 53,
+    "serf_wan": 8302
+  },
+  "acl_default_policy": "allow",
+  "acl_down-policy": "extend-cache"
 }
