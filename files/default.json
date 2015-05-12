@@ -16,5 +16,5 @@
     "serf_wan": 8302
   },
   "acl_default_policy": "allow",
-  "acl_down-policy": "extend-cache"
+  "acl_down_policy": "extend-cache"
 }
