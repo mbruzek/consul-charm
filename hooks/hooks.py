@@ -21,6 +21,7 @@ LEADER_DATA = {'shared-key': 'shared_key'}
     'cluster-relation-changed',
     'cluster-relation-departed')
 def changed():
+    import pdb; pdb.set_trace()
     data = get_template_data()
     changed = write_config(data)
 
@@ -74,7 +75,7 @@ def ensure_running(changed):
     if host.service_running('consul'):
         if changed:
             print("Reloaded consul config")
-            subprocess.check_output([BIN_PATH, "reload"])
+            subprocess.check_call([BIN_PATH, "reload"])
         else:
             print("Consul server already running")
         return
@@ -108,12 +109,6 @@ def get_conf():
     data['node_name'] = hookenv.local_unit().replace('/', '-')
     data['domain'] = config.get('domain')
     data['log_level'] = log_level.lower()
-
-    #data['key_file'] = ""
-    #data['ca_file'] = ""
-    #data['cert_file'] = ""
-    #data['verify_incoming'] = True
-    #data['verify_outgoing'] = True
 
     return data
 
