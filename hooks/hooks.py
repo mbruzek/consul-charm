@@ -21,6 +21,7 @@ LEADER_DATA = {'shared-key': 'shared_key'}
     'cluster-relation-changed',
     'cluster-relation-departed')
 def changed():
+    import pdb; pdb.set_trace()
     data = get_template_data()
     changed = write_config(data)
 
