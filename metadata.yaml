@@ -1,8 +1,15 @@
 name: consul
-summary: Distributed service discovery and configuration.
+summary: A distributed tool for discovery and configuration.
 description: |
-  A highly-available multi-data center aware solution for service
-  discovery with integrated failure detection.
+  Consul is a HashiCorp tool for service discovery, failure detection (health
+  checks), key/value storage, that works with multiple datacenters.
+maintainers:
+  - Matthew Bruzek <matthew.bruzek@canonical.com>
+  - Whit Morriss <whit.morriss@canonical.com>
+  - Charles Butler <charles.butler@canonical.com>
+tags:
+  - ops
+  - network
 provides:
   admin:
     interface: http
