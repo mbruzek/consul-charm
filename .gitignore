@@ -1,1 +1,6 @@
 .bzr
+*~
+*\#*
+*.pyc
+/.tox/
+/.coverage
