@@ -23,7 +23,7 @@ Usage
 
  After consul is deployed we can either use it directly with
  consul-agent or a the container-discovery subordinate charms.
- 
+
  The consul agent requires explicit service configuration.
 
  The container discovery automates the registration of docker containers
@@ -37,3 +37,8 @@ Todo
    and health
 
  - support tls/ssl for client api protocol
+
+Authors
+-------
+
+Kapil Thangavelu ( @kapilt )
