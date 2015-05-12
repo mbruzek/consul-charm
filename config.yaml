@@ -1,12 +1,18 @@
 options:
-  log-level: 
+  log-level:
     type: string
     default: info
-    description: "Logging level"
+    description: "The level of logging to show after the Consul agent has
+      started. This defaults to 'info'. The available log levels are 'trace',
+      'debug', 'info', 'warn', and 'err'. Note that you can always connect to
+      an agent via consul monitor and use any log level."
   domain:
     type: string
     default: consul
-    description: "Domain for dns records"
+    description: "By default, Consul responds to DNS queries in the 'consul.
+      domain. This flag can be used to change that domain. All queries in this
+      domain are assumed to be handled by Consul and will not be recursively 
+      resolved."
 #
 #  encrypt:
 #    type: boolean
