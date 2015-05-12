@@ -4,10 +4,19 @@ set -ex
 
 echo "Installing consul server on $JUJU_UNIT_NAME"
 
+apt-get install -qy unzip python-pip
+pip install charmhelpers
+
 TGT_DIR=/usr/local/bin
+ARCH=linux_amd64
+VERSION=0.5.0
+SRC_DIR=/opt/src/consul
 
+mkdir -p $SRC_DIR
+wget -O $SRC_DIR/consul_${VERSION}.zip https://dl.bintray.com/mitchellh/consul/${VERSION}_${ARCH}.zip
+unzip  $SRC_DIR/consul_${VERSION}.zip
+mv consul $TGT_DIR/consul
 
-bzip2 -k -c -d $CHARM_DIR/files/consul.amd64.bz2 > $TGT_DIR/consul
 chmod 555 $TGT_DIR/consul
 
 groupadd consul
@@ -23,6 +32,9 @@ chown consul: /var/lib/consul
 mkdir /usr/share/consul
 chown consul: /usr/share/consul
 
-tar xzv -C /usr/share/consul -f $CHARM_DIR/files/web_ui.tgz
+wget -O $SRC_DIR/${VERSION}_web_ui.zip https://dl.bintray.com/mitchellh/consul/${VERSION}_web_ui.zip
+unzip -d /usr/share/consul $SRC_DIR/${VERSION}_web_ui.zip
 
 install -m 0644 $CHARM_DIR/files/consul.upstart /etc/init/consul.conf
+
+echo "Install done"
