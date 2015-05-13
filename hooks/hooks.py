@@ -31,11 +31,8 @@ def install():
     # Install the software packages that will be used in this charm.
     apt_packages = ['git', 'python-pip', 'unzip', 'wget']
     fetch.apt_install(fetch.filter_installed_packages(apt_packages))
-    hookenv.log('Creating a consul group')
-    host.add_group('consul', system_group=True)
-    hookenv.log('Creating a consul user')
+    # Create the consul user and group.
     host.adduser('consul', shell='/sbin/nologin', system_user=True)
-    host.add_user_to_group('consul', 'consul')
     # The lib directory is where consul files are written.
     host.mkdir(LIB_DIRECTORY, owner='consul', group='consul')
     # The share directory is for the web_ui
@@ -233,7 +230,7 @@ def _follow_me():
     key = subprocess.check_output(
         ['/usr/local/bin/consul', 'keygen'])
     hookenv.relation_set(shared_key=key.strip())
-    data['shared-key'] = key
+    #data['shared-key'] = key
     return data
 
 if __name__ == '__main__':
