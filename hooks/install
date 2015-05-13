@@ -5,6 +5,7 @@ set -ex
 echo "Installing consul server on $JUJU_UNIT_NAME"
 
 apt-get install -qy git python-pip unzip python-pip wget
+easy_install -U pip
 pip install charmhelpers
 
 TGT_DIR=/usr/local/bin
