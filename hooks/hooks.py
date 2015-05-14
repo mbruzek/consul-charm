@@ -1,18 +1,46 @@
 #!/usr/bin/python
+
+import setup
+setup.pre_install()
+import consul
 import json
 import os
 import subprocess
 import sys
 
 from charmhelpers.core import hookenv, host
+from charmhelpers import fetch
+from path import path
 
 
 hooks = hookenv.Hooks()
 
-CONF_PATH = "/etc/consul.json"
-BIN_PATH = "/usr/local/bin/consul"
+CONF_PATH = '/etc/consul.json'
+CONSUL = path('/usr/local/bin/consul')
 PORTS = [53, 8302, 8400, 8500]
 LEADER_DATA = {'shared-key': 'shared_key'}
+LIB_DIRECTORY = path('/usr/lib/consul')
+LOCAL_BIN_DIRECTORY = path('/usr/local/bin')
+SHARE_DIRECTORY = path('/usr/share/consul')
+
+
+@hooks.hook('install')
+def install():
+    ''' Juju calls the start hook after the charm is created. '''
+    hookenv.log('Starting install hook')
+    # Install the software packages that will be used in this charm.
+    apt_packages = ['git', 'python-pip', 'unzip', 'wget']
+    fetch.apt_install(fetch.filter_installed_packages(apt_packages))
+    # Create the consul user and group.
+    host.adduser('consul', shell='/sbin/nologin', system_user=True)
+    # The lib directory is where consul files are written.
+    host.mkdir(LIB_DIRECTORY, owner='consul', group='consul')
+    # The share directory is for the web_ui
+    host.mkdir(SHARE_DIRECTORY, owner='consul', group='consul')
+    # Copy the upstart file to the init directory.
+    upstart_file = path(hookenv.charm_dir() + '/files/consul.upstart')
+    upstart_file.copy('/etc/init/consul.conf')
+    hookenv.log('The install hook is complete')
 
 
 @hooks.hook(
@@ -21,11 +49,19 @@ LEADER_DATA = {'shared-key': 'shared_key'}
     'cluster-relation-changed',
     'cluster-relation-departed')
 def changed():
+    ''' Juju calls the config-changed hook when configuration changes. '''
     data = get_template_data()
+    config = hookenv.config()
+    if not CONSUL.isfile() or config.changed('version'):
+        version = config['version']
+        hookenv.log('The version has changed, installing {0}'.format(version))
+        consul.install_consul(version, LOCAL_BIN_DIRECTORY)
+        consul.install_web_ui(version, SHARE_DIRECTORY)
+
     changed = write_config(data)
 
     if changed:
-        print("Wrote config with \n %s" % (json.dumps(data, indent=2)))
+        print('Wrote config with \n %s' % (json.dumps(data, indent=2)))
 
     if not validate_config(data):
         return
@@ -34,7 +70,7 @@ def changed():
     rel = _raft_rel()
 
     if changed and rel:
-        print("Rewriting config")
+        print('Rewriting config')
         hookenv.relation_set(rel, running='yes')
         for p in PORTS:
             hookenv.open_port(p)
@@ -42,6 +78,7 @@ def changed():
 
 @hooks.hook('stop')
 def stop():
+    ''' Juju calls the stop hook before the unit is destroyed.  Clean up. '''
     if host.service_running('consul'):
         host.service_stop('consul')
     for p in PORTS:
@@ -73,12 +110,12 @@ def write_config(data):
 def ensure_running(changed):
     if host.service_running('consul'):
         if changed:
-            print("Reloaded consul config")
-            subprocess.check_call([BIN_PATH, "reload"])
+            print('Reloaded consul config')
+            subprocess.check_call([CONSUL, 'reload'])
         else:
-            print("Consul server already running")
+            print('Consul server already running')
         return
-    print("Starting consul server")
+    print('Starting consul server')
     host.service_start('consul')
 
 
@@ -86,7 +123,7 @@ def get_template_data():
     data = get_leader_data()
     if data is None:
         return
-    print("Leader data %s" % data)
+    print('Leader data %s' % data)
     data.update(get_conf())
     return data
 
@@ -104,7 +141,7 @@ def get_conf():
             hookenv.WARNING)
         log_level = 'debug'
 
-    data['datacenter'] = os.environ.get("JUJU_ENV_NAME", "dc1")
+    data['datacenter'] = os.environ.get('JUJU_ENV_NAME', 'dc1')
     data['node_name'] = hookenv.local_unit().replace('/', '-')
     data['domain'] = config.get('domain')
     data['log_level'] = log_level.lower()
@@ -113,24 +150,21 @@ def get_conf():
 
 
 def get_leader_data():
-    """Retrieve the current leader data.
-
-    If needed, perform leader election.
-    """
+    ''' Retrieve current leader data. If needed, perform leader election. '''
     result = {}
     leader = _leader()
     if leader is None:
-        print("No leader found")
+        print('No leader found')
         return result
     if leader == hookenv.local_unit():
-        print("Follow me")
+        print('Follow me')
         _follow_me()
         result['bootstrap'] = True
     else:
-        print("Join cluster")
+        print('Join cluster')
         peers = _peer_addrs()
         if not peers:
-            print("No peers known.. exiting")
+            print('No peers known, exiting')
             return result
         result['start_join'] = peers
     data = hookenv.relation_get(unit=leader, rid=_raft_rel())
@@ -141,7 +175,7 @@ def get_leader_data():
 
 @hookenv.cached
 def _raft_rel():
-    """Retrieve the cluster relation id if it exists."""
+    ''' Retrieve the cluster relation id if it exists. '''
     leader_rel = hookenv.relation_ids('cluster')
     if not leader_rel:
         return None
@@ -149,7 +183,7 @@ def _raft_rel():
 
 
 def _peers():
-    """Get all the cluster peers."""
+    ''' Get all the cluster peers. '''
     leader_rel = _raft_rel()
     if not leader_rel:
         return []
@@ -158,11 +192,11 @@ def _peers():
 
 
 def _peer_addrs():
-    """Get the address of all cluster peers."""
+    ''' Get the address of all cluster peers. '''
     addrs = []
     peers = _peers()
     rid = _raft_rel()
-    print("Filtering peer addresses from %s" % peers)
+    print('Filtering peer addresses from %s' % peers)
     for p in peers:
         data = hookenv.relation_get(unit=p, rid=rid)
         if data.get('running'):
@@ -182,13 +216,13 @@ def _leader():
     units.append(local_unit)
     units.sort()
     leader = units.pop(0)
-    print("Leader is %s followers are %s" % (
-        leader, ",".join(units)))
+    print('Leader is %s followers are %s' % (
+        leader, ','.join(units)))
     return leader
 
 
 def _follow_me():
-    """Elect self as the leader, and generate keys and certs."""
+    ''' Elect self as the leader, and generate keys and certs. '''
     data = hookenv.relation_get(
         unit=hookenv.local_unit(), rid=_raft_rel())
     if 'shared_key' in data:
@@ -196,7 +230,7 @@ def _follow_me():
     key = subprocess.check_output(
         ['/usr/local/bin/consul', 'keygen'])
     hookenv.relation_set(shared_key=key.strip())
-    data['shared-key'] = key
+    #data['shared-key'] = key
     return data
 
 if __name__ == '__main__':
