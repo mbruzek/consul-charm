@@ -129,6 +129,9 @@ def ensure_running(changed):
     if host.service_running('consul'):
         if changed:
             print('Reloading the consul process.')
+            # Reloading configuration does not reload all configuration items.
+            # The items which are reloaded include: Log level, Checks,
+            # Services, Watches, HTTP Client Address
             host.service_reload('consul', True)
         else:
             print('Consul server already running.')
