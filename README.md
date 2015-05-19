@@ -89,8 +89,8 @@ assumed to be handled by Consul and will not be recursively resolved.
 
 **log-level** - The level of logging to show after the Consul agent has started.
 This defaults to "info". The available log levels are "trace", "debug", "info",
-"warn", and "err". Note that you can always connect to an agent via consul
-monitor and use any log level.
+"warn", and "err". Note that you can always connect to an agent via `consul
+monitor` and use any log level.
 
 **domain** - By default, Consul responds to DNS queries in the "consul." domain.
 This flag can be used to change that domain. All queries in this domain are
