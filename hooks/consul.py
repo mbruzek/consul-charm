@@ -91,8 +91,8 @@ def configure_consul(defaults, config):
     data object.
     '''
     log_level = config.get('log-level')
-    # The available log levels are "trace", "debug", "info", "warn", and "err".
-    if log_level.lower() not in ('debug', 'warn', 'error', 'info', 'trace'):
+    # The available log levels are 'trace', 'debug', 'info', 'warn', and 'err'.
+    if log_level.lower() not in ('trace', 'debug', 'info', 'warn', 'err'):
         hookenv.log('invalid log level config %s' % log_level,
                     hookenv.WARNING)
         log_level = 'debug'
