@@ -34,7 +34,7 @@ class TestDeployment(unittest.TestCase):
         cls.consul1 = cls.deployment.sentry.unit['consul/1']
         cls.consul2 = cls.deployment.sentry.unit['consul/2']
 
-    def test_consul_version(self):
+    def test_consul_binary(self):
         ''' Verify that the consul binary is installed and in the path. '''
         units = [self.consul0, self.consul1, self.consul2]
         for unit in units:
@@ -72,7 +72,6 @@ class TestDeployment(unittest.TestCase):
         print(ui_url)
         response = requests.get(ui_url)
         response.raise_for_status()
-        #print(str(response.text))
         consul = 'Consul'
         # Search for the product name on the main page.
         index = response.text.find(consul)
