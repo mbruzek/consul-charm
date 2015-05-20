@@ -89,6 +89,11 @@ def start():
         hookenv.log('The consul service is not running!', hookenv.WARNING)
 
 
+@hooks.hook('api-relation-changed')
+def api_relation():
+    hookenv.relation_set(port=8500, address=hookenv.unit_private_ip())
+
+
 @hooks.hook('stop')
 def stop():
     ''' Juju calls the stop hook before the unit is destroyed.  Clean up. '''
