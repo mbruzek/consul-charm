@@ -73,7 +73,7 @@ gateways to other datacenters and forward traffic as appropriate.
 
 This charm exposes the following configuration values:  
 
-** bootstrap-expect ** - The expected servers in the datacenter.
+**bootstrap-expect** - The expected servers in the datacenter.
 Consul server nodes are responsible for running a
 [consensus protocol](https://www.consul.io/docs/internals/consensus.html) and
 storing the cluster state.  Before a cluster can service requests, a server
