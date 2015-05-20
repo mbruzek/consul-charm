@@ -32,6 +32,7 @@ suggests no more than 5 per datacenter.
 
     juju deploy -n 3 consul
 
+Once exposed the Consul web ui is available at <http://consul-public-ip:8500/ui>
 
 ### Ports Used
 
@@ -39,10 +40,10 @@ Consul requires up to 5 different ports to work properly, some on TCP, UDP, or
 both protocols. Below we document the requirements for each port.
 
 - Server RPC (Default 8300). This is used by servers to handle incoming requests
- from other agents. TCP only.
+ from other agents. TCP only. This port is not opened on the public interface.
 
 - Serf LAN (Default 8301). This is used to handle gossip in the LAN. Required by
- all agents. TCP and UDP.
+ all agents. TCP and UDP. This port is not opened on the public interface.
 
 - Serf WAN (Default 8302). This is used by servers to gossip over the WAN to
 other servers. TCP and UDP.
@@ -53,8 +54,10 @@ TCP only.
 - HTTP API (Default 8500). This is used by clients to talk to the HTTP API. TCP
 only.
 
-- DNS Interface (Default 8600). Used to resolve DNS queries. TCP and UDP.
+- DNS Interface (Default 53). Used to resolve DNS queries. TCP and UDP.
 
+Note not all of these ports are open on the public interface. User must expose
+the charm through Juju before the ports are available publicly.
 
 ## Scale out Usage
 
@@ -68,20 +71,36 @@ gateways to other datacenters and forward traffic as appropriate.
 
 # Configuration
 
-The Consul software has only a few
-[reloadable configuration](https://www.consul.io/docs/agent/options.html#reloadable-configuration)
-options.  
-
 This charm exposes the following configuration values:  
 
-**log-level** - The level of logging to show after the Consul agent has started.
-This defaults to "info". The available log levels are "trace", "debug", "info",
-"warn", and "err". Note that you can always connect to an agent via consul
-monitor and use any log level.
+** bootstrap-expect ** - The expected servers in the datacenter.
+Consul server nodes are responsible for running a
+[consensus protocol](https://www.consul.io/docs/internals/consensus.html) and
+storing the cluster state.  Before a cluster can service requests, a server
+node must be elected leader.
+[Bootstrapping](https://www.consul.io/docs/guides/bootstrapping.html) is the
+process of joining the initial server nodes into a cluster. We recommend **3**
+or **5** total servers per datacenter. A single server deployment is **highly**
+discouraged as data loss is inevitable in a failure scenario.
 
 **domain** - By default, Consul responds to DNS queries in the "consul." domain.
 This flag can be used to change that domain. All queries in this domain are
 assumed to be handled by Consul and will not be recursively resolved.
+
+**log-level** - The level of logging to show after the Consul agent has started.
+This defaults to "info". The available log levels are "trace", "debug", "info",
+"warn", and "err". Note that you can always connect to an agent via `consul
+monitor` and use any log level.
+
+**domain** - By default, Consul responds to DNS queries in the "consul." domain.
+This flag can be used to change that domain. All queries in this domain are
+assumed to be handled by Consul and will not be recursively resolved.
+
+**version** - The version of Consul software to download and install.
+
+Go to the
+[Consul configuration web page](https://consul.io/docs/agent/options.html) for
+more information on the configuration options availble in the Consul software.
 
 ## Contact Information
 

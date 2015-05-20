@@ -1,10 +1,18 @@
 #!/usr/bin/env python
 
+import os
+import json
+
+from charmhelpers.core import hookenv
 from charmhelpers.fetch import archiveurl
 from path import path
 
-# The url prefix for the consul release download files.
+
+# The path to the JSON file containing default configuration values.
+DEFAULT_JSON = path(hookenv.charm_dir() + '/files/default.json')
+# The url prefix to download consul release files.
 URL_PREFIX = 'https://dl.bintray.com/mitchellh/consul/'
+CONF_PATH = path('/etc/consul.json')
 
 
 def consul_arch():
@@ -53,3 +61,52 @@ def install_web_ui(version, destination_directory='/usr/share/consul'):
         # Download and unzip the web ui to the share directory.
         installer.install(url, dest=destination_directory)
         # TODO verify the sha256sum of the zip file!
+
+
+def has_changed(file, data):
+    ''' Return True if the data object differs the JSON in the file. '''
+    if os.path.exists(file):
+        with open(file) as fh:
+            contents = json.loads(fh.read())
+    else:
+        contents = {}
+
+    return contents != data
+
+
+def get_defaults(default_file):
+    ''' Load the default values for consul from a JSON file. '''
+    if os.path.exists(default_file):
+        with open(default_file) as fh:
+            defaults = json.loads(fh.read())
+    else:
+        defaults = {}
+    return defaults
+
+
+def configure_consul(defaults, config):
+    '''
+    Read the default JSON file from the charm directory, get the current
+    configuration values, set the appropriate consul values, and return the
+    data object.
+    '''
+    log_level = config.get('log-level')
+    # The available log levels are 'trace', 'debug', 'info', 'warn', and 'err'.
+    if log_level.lower() not in ('trace', 'debug', 'info', 'warn', 'err'):
+        hookenv.log('invalid log level config %s' % log_level,
+                    hookenv.WARNING)
+        log_level = 'debug'
+    # Set the extra values on the data object that will be used to write JSON.
+    # https://consul.io/docs/agent/options.htm
+    defaults['datacenter'] = os.environ.get('JUJU_ENV_NAME', 'dc1')
+    defaults['node_name'] = hookenv.local_unit().replace('/', '-')
+    defaults['domain'] = config.get('domain')
+    defaults['log_level'] = log_level.lower()
+
+    bootstrap_expect = config.get('bootstrap-expect')
+    if int(bootstrap_expect) % 2 == 0:
+        hookenv.log('even values for bootstrap-expect is highly discourged',
+                    hookenv.WARNING)
+    defaults['bootstrap_expect'] = int(bootstrap_expect)
+
+    return defaults

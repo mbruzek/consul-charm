@@ -1,15 +1,14 @@
 options:
-  version:
-    type: string
-    default: "0.5.0"
-    description: "The version of Consul software to install, default is '0.5.0'"
-  log-level:
-    type: string
-    default: "info"
-    description: "The level of logging to show after the Consul agent has
-      started. This defaults to 'info'. The available log levels are 'trace',
-      'debug', 'info', 'warn', and 'err'. Note that you can always connect to
-      an agent via consul monitor and use any log level."
+  bootstrap-expect:
+    type: int
+    default: 3
+    description: "The number of expected servers in the datacenter. Before a
+      Consul cluster can begin to service requests, a server node must be
+      elected leader. Thus, the first nodes that are started are generally the
+      server nodes. Bootstrapping is the process of joining these initial
+      server nodes into a cluster. We recommend 3 or 5 total servers per
+      datacenter. A single server deployment is highly discouraged as data
+      loss is inevitable in a failure scenario."
   domain:
     type: string
     default: "consul"
@@ -17,6 +16,17 @@ options:
       domain. This flag can be used to change that domain. All queries in this
       domain are assumed to be handled by Consul and will not be recursively
       resolved."
+  log-level:
+    type: string
+    default: "info"
+    description: "The level of logging to show after the Consul agent has
+      started. This defaults to 'info'. The available log levels are 'trace',
+      'debug', 'info', 'warn', and 'err'. Note that you can always connect to
+      an agent via consul monitor and use any log level."
+  version:
+    type: string
+    default: "0.5.2"
+    description: "The version of Consul software to install."
 #
 #  encrypt:
 #    type: boolean
