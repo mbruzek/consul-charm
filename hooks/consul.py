@@ -2,6 +2,7 @@
 
 import os
 import json
+import requests
 
 from charmhelpers.core import hookenv
 from charmhelpers.fetch import archiveurl
@@ -42,11 +43,15 @@ def install_consul(version, destination_directory='/usr/local/bin'):
     if version:
         architecture = consul_arch()
         consul_file_name = '{0}_{1}.zip'.format(version, architecture)
+        # Find the sha256sum for the specific file name.
+        sha256sum = find_sha256sum(consul_file_name)
+        print('Expecting {0} for {1}'.format(sha256sum, consul_file_name))
         url = URL_PREFIX + consul_file_name
+        print('Fetching {0}'.format(url))
         installer = archiveurl.ArchiveUrlFetchHandler()
         # Download and unzip the archive into the final destination directory.
-        installer.install(url, dest=destination_directory)
-        # TODO verify the sha256sum of the zip file!
+        installer.install(url, dest=destination_directory, checksum=sha256sum,
+                          hash_type='sha256')
         consul = path(destination_directory + '/consul')
         # Make the consul binary executable.
         consul.chmod(0o555)
@@ -56,11 +61,33 @@ def install_web_ui(version, destination_directory='/usr/share/consul'):
     ''' Install the configured version of consul web ui. '''
     if version:
         web_ui_name = '{0}_web_ui.zip'.format(version)
+        sha256sum = find_sha256sum(web_ui_name)
+        print('Expecting {0} for {1}'.format(sha256sum, web_ui_name))
         url = URL_PREFIX + web_ui_name
+        print('Fetching {0}'.format(url))
         installer = archiveurl.ArchiveUrlFetchHandler()
         # Download and unzip the web ui to the share directory.
-        installer.install(url, dest=destination_directory)
-        # TODO verify the sha256sum of the zip file!
+        installer.install(url, dest=destination_directory, checksum=sha256sum,
+                          hash_type='sha256')
+
+
+def find_sha256sum(file_name):
+    ''' Find the expected checksum in the SHA256SUMS file by file name.'''
+    # Get the version from the target file name.
+    version = file_name.split('_')[0]
+    # The SHA256SUMS files have a version prefix.
+    shasum_file_name = '{0}_SHA256SUMS'.format(version)
+    shasum_file_url = URL_PREFIX + shasum_file_name
+    # Request the file that contains the sha256sums for consul and the web ui.
+    response = requests.get(shasum_file_url)
+    response.raise_for_status()
+    lines = str(response.text).split('\n')
+    for line in lines:
+        # find the file name on the line.
+        if file_name in line:
+            # Take the first token of this line as the sum.
+            return line.split()[0]
+    return ''
 
 
 def has_changed(file, data):

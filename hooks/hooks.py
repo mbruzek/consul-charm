@@ -38,7 +38,7 @@ def install():
     ''' Juju calls the start hook after the charm is created. '''
     hookenv.log('Starting install hook.')
     # Install the software packages that will be used in this charm.
-    apt_packages = ['git', 'python-pip', 'unzip', 'wget']
+    apt_packages = ['git', 'python-pip', 'python-requests', 'unzip', 'wget']
     fetch.apt_install(fetch.filter_installed_packages(apt_packages))
     # Create the consul user and group.
     host.adduser('consul', shell='/sbin/nologin', system_user=True)
@@ -92,6 +92,7 @@ def start():
 @hooks.hook('stop')
 def stop():
     ''' Juju calls the stop hook before the unit is destroyed.  Clean up. '''
+    # Do we need to call explicitly call leave here?
     if host.service_running('consul'):
         host.service_stop('consul')
     for p in PORTS:

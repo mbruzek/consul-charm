@@ -23,14 +23,14 @@ Consul grows to multiple regions.
 
 The Consul charm can be deployed from the command line:
 
-    juju deploy consul
+    juju deploy consul -n 3
 
 To be highly available deploy multiple units of the consul charm. The number of
 units in the cluster should be odd and the
 [Consul documentation](https://www.consul.io/docs/agent/options.html)
 suggests no more than 5 per datacenter.
 
-    juju deploy -n 3 consul
+    juju add-unit consul -n 2
 
 Once exposed the Consul web ui is available at <http://consul-public-ip:8500/ui>
 
@@ -73,7 +73,7 @@ gateways to other datacenters and forward traffic as appropriate.
 
 This charm exposes the following configuration values:  
 
-** bootstrap-expect ** - The expected servers in the datacenter.
+**bootstrap-expect** - The expected servers in the datacenter.
 Consul server nodes are responsible for running a
 [consensus protocol](https://www.consul.io/docs/internals/consensus.html) and
 storing the cluster state.  Before a cluster can service requests, a server
