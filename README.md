@@ -1,6 +1,8 @@
 # Consul
 
-Consul is a tool for discovering and configuring services.
+Consul is a tool for discovering and configuring services. This charm deploys
+a Consul server instance to a public cloud that join with other Consul servers
+to form a fully functioning cluster.  
 
 **Key Features**:
 
@@ -91,10 +93,6 @@ assumed to be handled by Consul and will not be recursively resolved.
 This defaults to "info". The available log levels are "trace", "debug", "info",
 "warn", and "err". Note that you can always connect to an agent via `consul
 monitor` and use any log level.
-
-**domain** - By default, Consul responds to DNS queries in the "consul." domain.
-This flag can be used to change that domain. All queries in this domain are
-assumed to be handled by Consul and will not be recursively resolved.
 
 **version** - The version of Consul software to download and install.
 
