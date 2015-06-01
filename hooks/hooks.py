@@ -127,6 +127,34 @@ def cluster():
     hookenv.log('The cluster-relation-joined hook finished.')
 
 
+@hooks.hook('api-relation-joined')
+def api():
+    '''
+    The api relation gives other charms the address and port of the consul
+    api server. The main interface to Consul is a RESTful HTTP API.
+    By default, the output of all HTTP API requests is minimized JSON. If the
+    client passes pretty on the query string, formatted JSON will be returned.
+    '''
+    hookenv.log('Starting the api-relation-joined hook.')
+    private_address = hookenv.unit_private_ip()
+    hookenv.relation_set(address=private_address, port='8500')
+    hookenv.log('The api-relation-joined hook finished.')
+
+
+@hooks.hook('admin-relation-joined')
+def admin():
+    '''
+    The admin relation gives other charms the hostname, port and url
+    of the HTTP administrator interface for Consul.
+    '''
+    hookenv.log('Starting the admin-relation-joined hook.')
+    admin_port = '8500'
+    private_address = hookenv.unit_private_ip()
+    ui_url='http://{0}:{1}/ui'.format(private_address, admin_port)
+    hookenv.relation_set(hostname=private_address, port=admin_port, url=ui_url)
+    hookenv.log('The admin-relation-joined finished.')
+
+
 def ensure_running(changed):
     '''
     Reload the consul service if running and the configuration has changed,
