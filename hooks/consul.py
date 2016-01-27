@@ -6,14 +6,14 @@ import requests
 
 from charmhelpers.core import hookenv
 from charmhelpers.fetch import archiveurl
-from path import path
+from path import Path
 
 
 # The path to the JSON file containing default configuration values.
-DEFAULT_JSON = path(hookenv.charm_dir() + '/files/default.json')
+DEFAULT_JSON = Path(hookenv.charm_dir() + '/files/default.json')
 # The url prefix to download consul release files.
-URL_PREFIX = 'https://dl.bintray.com/mitchellh/consul/'
-CONF_PATH = path('/etc/consul.json')
+URL_PREFIX = 'https://releases.hashicorp.com/consul'
+CONF_PATH = Path('/etc/consul.json')
 
 
 def consul_arch():
@@ -42,17 +42,17 @@ def install_consul(version, destination_directory='/usr/local/bin'):
     ''' Install the configured version of consul for the architecture. '''
     if version:
         architecture = consul_arch()
-        consul_file_name = '{0}_{1}.zip'.format(version, architecture)
+        consul_file_name = 'consul_{0}_{1}.zip'.format(version, architecture)
         # Find the sha256sum for the specific file name.
-        sha256sum = find_sha256sum(consul_file_name)
+        sha256sum = find_sha256sum(version, consul_file_name)
         print('Expecting {0} for {1}'.format(sha256sum, consul_file_name))
-        url = URL_PREFIX + consul_file_name
+        url = '{0}/{1}/{2}'.format(URL_PREFIX, version, consul_file_name)
         print('Fetching {0}'.format(url))
         installer = archiveurl.ArchiveUrlFetchHandler()
         # Download and unzip the archive into the final destination directory.
         installer.install(url, dest=destination_directory, checksum=sha256sum,
                           hash_type='sha256')
-        consul = path(destination_directory + '/consul')
+        consul = Path(destination_directory + '/consul')
         # Make the consul binary executable.
         consul.chmod(0o555)
 
@@ -60,10 +60,10 @@ def install_consul(version, destination_directory='/usr/local/bin'):
 def install_web_ui(version, destination_directory='/usr/share/consul'):
     ''' Install the configured version of consul web ui. '''
     if version:
-        web_ui_name = '{0}_web_ui.zip'.format(version)
-        sha256sum = find_sha256sum(web_ui_name)
+        web_ui_name = 'consul_{0}_web_ui.zip'.format(version)
+        sha256sum = find_sha256sum(version, web_ui_name)
         print('Expecting {0} for {1}'.format(sha256sum, web_ui_name))
-        url = URL_PREFIX + web_ui_name
+        url = '{0}/{1}/{2}'.format(URL_PREFIX, version, web_ui_name)
         print('Fetching {0}'.format(url))
         installer = archiveurl.ArchiveUrlFetchHandler()
         # Download and unzip the web ui to the share directory.
@@ -71,15 +71,14 @@ def install_web_ui(version, destination_directory='/usr/share/consul'):
                           hash_type='sha256')
 
 
-def find_sha256sum(file_name):
+def find_sha256sum(version, file_name):
     ''' Find the expected checksum in the SHA256SUMS file by file name.'''
-    # Get the version from the target file name.
-    version = file_name.split('_')[0]
     # The SHA256SUMS files have a version prefix.
-    shasum_file_name = '{0}_SHA256SUMS'.format(version)
-    shasum_file_url = URL_PREFIX + shasum_file_name
+    shasum_file_name = 'consul_{0}_SHA256SUMS'.format(version)
+    shasum_url = '{0}/{1}/{2}'.format(URL_PREFIX, version, shasum_file_name)
+    print('Get the checksum file {0}'.format(shasum_url))
     # Request the file that contains the sha256sums for consul and the web ui.
-    response = requests.get(shasum_file_url)
+    response = requests.get(shasum_url)
     response.raise_for_status()
     lines = str(response.text).split('\n')
     for line in lines:
