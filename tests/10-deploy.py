@@ -30,14 +30,10 @@ class TestDeployment(unittest.TestCase):
             amulet.raise_status(amulet.SKIP, msg=message)
         except:
             raise
-        cls.consul0 = cls.deployment.sentry.unit['consul/0']
-        cls.consul1 = cls.deployment.sentry.unit['consul/1']
-        cls.consul2 = cls.deployment.sentry.unit['consul/2']
 
     def test_consul_binary(self):
         ''' Verify that the consul binary is installed and in the path. '''
-        units = [self.consul0, self.consul1, self.consul2]
-        for unit in units:
+        for unit in self.deployment.sentry['consul']:
             address = unit.info['public-address']
             print(address)
             output, code = unit.run('consul version')
@@ -48,8 +44,7 @@ class TestDeployment(unittest.TestCase):
 
     def test_config(self):
         ''' Verify the configuration file contains the proper values. '''
-        units = [self.consul0, self.consul1, self.consul2]
-        for unit in units:
+        for unit in self.deployment.sentry['consul']:
             contents = unit.file_contents('/etc/consul.json')
             if contents:
                 search = configuration['domain']
@@ -67,7 +62,7 @@ class TestDeployment(unittest.TestCase):
 
     def test_web_ui(self):
         ''' Verify that the web ui is responding to HTTP GET requests. '''
-        ui_address = self.consul0.info['public-address']
+        ui_address = self.deployment.sentry['consul'][0].info['public-address']
         ui_url = 'http://{0}:8500/ui/'.format(ui_address)
         print(ui_url)
         response = requests.get(ui_url)

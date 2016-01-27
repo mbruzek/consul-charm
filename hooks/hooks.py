@@ -150,7 +150,7 @@ def admin():
     hookenv.log('Starting the admin-relation-joined hook.')
     admin_port = '8500'
     private_address = hookenv.unit_private_ip()
-    ui_url='http://{0}:{1}/ui'.format(private_address, admin_port)
+    ui_url = 'http://{0}:{1}/ui'.format(private_address, admin_port)
     hookenv.relation_set(hostname=private_address, port=admin_port, url=ui_url)
     hookenv.log('The admin-relation-joined finished.')
 
