@@ -25,7 +25,7 @@ options:
       an agent via consul monitor and use any log level."
   version:
     type: string
-    default: "0.5.2"
+    default: "0.6.3"
     description: "The version of Consul software to install."
 #
 #  encrypt:
