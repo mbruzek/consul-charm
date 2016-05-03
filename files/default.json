@@ -1,7 +1,7 @@
 {
   "client_addr": "0.0.0.0",
   "recursor": "8.8.8.8",
-  "ui_dir": "/usr/share/consul/dist",
+  "ui_dir": "/usr/share/consul",
   "leave_on_terminate": true,
   "rejoin_after_leave": true,
   "disable_update_check": true,
