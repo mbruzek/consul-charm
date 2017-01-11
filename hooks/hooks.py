@@ -9,7 +9,7 @@ import sys
 
 from charmhelpers.core import hookenv, host
 from charmhelpers import fetch
-from path import path
+from path import Path as path
 
 
 hooks = hookenv.Hooks()
